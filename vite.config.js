@@ -15,8 +15,8 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        headers: resolve(__dirname, 'public/_headers'),
+        main: path.resolve(__dirname, 'index.html'),
+        headers: path.resolve(__dirname, 'public/_headers'),
       },
     },
   },
