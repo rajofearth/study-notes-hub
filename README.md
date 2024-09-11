@@ -86,7 +86,7 @@ We welcome contributions! Feel free to submit a Pull Request or create an Issue 
 
 ## 📧 Contact
 
-Developed by [Raj of Earth](https://github.com/rajofearth). For questions or feedback, please reach out via GitHub.
+Developed by [Yashraj Maher](https://github.com/rajofearth). For questions or feedback, please reach out via GitHub.
 
 ## 📄 License
 
