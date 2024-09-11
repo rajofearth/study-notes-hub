@@ -10,6 +10,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    sourcemap: true,
+  },
   publicDir: 'public',
   server: {
     middleware: (req, res, next) => {
