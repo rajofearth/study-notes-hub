@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2, AlertCircle, Download, FileX } from "lucide-react"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { Header } from "./Header"
+import ErrorBoundary from "@/components/ErrorBoundary"
+
+const PdfViewer = lazy(() => import("@/components/PdfViewer"))
 
 export function SubjectPageJsx({ subject, onBack }) {
   const [selectedSemester, setSelectedSemester] = useState("semester1")
@@ -17,7 +20,7 @@ export function SubjectPageJsx({ subject, onBack }) {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768) // Adjust this breakpoint as needed
+      setIsMobile(window.innerWidth <= 768)
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
@@ -35,6 +38,17 @@ export function SubjectPageJsx({ subject, onBack }) {
     },
   }
 
+  const rawPdfSources = {
+    semester1: {
+      notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s1.pdf`,
+      handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s1.pdf`,
+    },
+    semester2: {
+      notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s2.pdf`,
+      handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s2.pdf`,
+    },
+  }
+
   const handleSemesterChange = (value) => {
     setSelectedSemester(value)
     setSelectedNoteType("notes")
@@ -45,6 +59,7 @@ export function SubjectPageJsx({ subject, onBack }) {
   }
 
   const currentPdfSource = pdfSources[selectedSemester][selectedNoteType]
+  const currentRawPdfSource = rawPdfSources[selectedSemester][selectedNoteType]
 
   useEffect(() => {
     setIsLoading(true)
@@ -68,16 +83,16 @@ export function SubjectPageJsx({ subject, onBack }) {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <Button variant="ghost" onClick={onBack} className="mb-4 sm:mb-0">
+      <main className="container mx-auto px-4 py-8 flex-grow">
+        <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <Button variant="ghost" onClick={onBack} className="mb-4 sm:mb-0" aria-label="Go back">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           <div className="w-full sm:w-auto">
             <Breadcrumb items={breadcrumbItems} />
           </div>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold my-8">{subject.title}</h1>
+        </nav>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8">{subject.title}</h1>
         <Card className="mb-8">
           <CardContent className="p-6">
             <Tabs value={selectedSemester} onValueChange={handleSemesterChange}>
@@ -102,46 +117,37 @@ export function SubjectPageJsx({ subject, onBack }) {
             </Tabs>
           </CardContent>
         </Card>
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">PDF Viewer</h2>
-          <div className={`w-full ${isMobile ? 'h-[200px]' : 'h-[600px]'} border border-input rounded-lg overflow-hidden relative`}>
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            )}
-            {error && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                <div className="text-center">
-                  <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-                  <p className="text-destructive">{error}</p>
-                </div>
-              </div>
-            )}
-            {!isLoading && !error && (
-              isMobile ? (
-                <div className="flex items-center justify-center h-full">
-                  <Button onClick={() => window.open(currentPdfSource, '_blank')}>
-                    <Download className="mr-2 h-4 w-4" /> Download PDF
-                  </Button>
-                </div>
-              ) : (
-                <iframe
-                  src={currentPdfSource}
-                  className="w-full h-full"
-                  title={`${subject.title} - ${selectedSemester} ${selectedNoteType}`}
-                  key={currentPdfSource}
-                />
-              )
-            )}
+        <section className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">PDF Viewer</h2>
+            <Button 
+              onClick={() => window.open(currentRawPdfSource, '_blank')} 
+              aria-label="Download PDF"
+              size="sm"
+            >
+              <Download className="mr-2 h-4 w-4" /> Download PDF
+            </Button>
           </div>
-        </div>
-      </div>
+          <ErrorBoundary fallback={<p>Something went wrong. Please try again later.</p>}>
+            <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
+              <PdfViewer
+                isLoading={isLoading}
+                error={error}
+                currentPdfSource={currentPdfSource}
+                subject={subject}
+                selectedSemester={selectedSemester}
+                selectedNoteType={selectedNoteType}
+                isMobile={isMobile}
+              />
+            </Suspense>
+          </ErrorBoundary>
+        </section>
+      </main>
     </div>
   )
 }
 
-function SemesterContent({ semester, selectedNoteType, onNoteTypeChange }) {
+const SemesterContent = React.memo(({ semester, selectedNoteType, onNoteTypeChange }) => {
   return (
     <Tabs value={selectedNoteType} onValueChange={onNoteTypeChange}>
       <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -156,4 +162,6 @@ function SemesterContent({ semester, selectedNoteType, onNoteTypeChange }) {
       </TabsContent>
     </Tabs>
   );
-}
+})
+
+SemesterContent.displayName = 'SemesterContent'
