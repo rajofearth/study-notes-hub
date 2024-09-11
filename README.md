@@ -1,7 +1,3 @@
-Here's an improved version of the README.md for your **Study Notes Hub** project that reflects a clean, structured approach with an emphasis on readability and smart Markdown usage:
-
----
-
 # 📚 Study Notes Hub
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/rajofearth/study-notes-hub/blob/main/LICENSE)
