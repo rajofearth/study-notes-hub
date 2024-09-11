@@ -5,7 +5,7 @@ import { ThemeProvider } from "./components/theme-provider"
 function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <Router basename="/study-notes-hub">
         <Routes>
           <Route path="/pdfs/*" element={null} />
           <Route path="*" element={<StudyNotesHubJsx />} />

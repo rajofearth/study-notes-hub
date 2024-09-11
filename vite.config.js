@@ -12,6 +12,13 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        headers: resolve(__dirname, 'public/_headers'),
+      },
+    },
   },
   publicDir: 'public',
   server: {
