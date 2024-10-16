@@ -4,7 +4,7 @@ import React, { useState, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2, AlertCircle, Download, FileX } from "lucide-react"
+import { ArrowLeft, Download } from "lucide-react"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { Header } from "./Header"
 import ErrorBoundary from "@/components/ErrorBoundary"
@@ -14,8 +14,8 @@ const PdfViewer = lazy(() => import("@/components/PdfViewer"))
 export function SubjectPageJsx({ subject, onBack }) {
   const [selectedSemester, setSelectedSemester] = useState("semester1")
   const [selectedNoteType, setSelectedNoteType] = useState("notes")
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  // const [isLoading, setIsLoading] = useState(true)
+  // const [error, setError] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -61,17 +61,17 @@ export function SubjectPageJsx({ subject, onBack }) {
   const currentPdfSource = pdfSources[selectedSemester][selectedNoteType]
   const currentRawPdfSource = rawPdfSources[selectedSemester][selectedNoteType]
 
-  useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    const timer = setTimeout(() => {
-      if (Math.random() > 0.9) {
-        setError("Failed to load PDF. Please try again.")
-      }
-      setIsLoading(false)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [currentPdfSource])
+  // useEffect(() => {
+  //   setIsLoading(true)
+  //   setError(null)
+  //   const timer = setTimeout(() => {
+  //     if (Math.random() > 0.9) {
+  //       setError("Failed to load PDF. Please try again.")
+  //     }
+  //     setIsLoading(false)
+  //   }, 1000)
+  //   return () => clearTimeout(timer)
+  // }, [currentPdfSource])
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -129,10 +129,10 @@ export function SubjectPageJsx({ subject, onBack }) {
             </Button>
           </div>
           <ErrorBoundary fallback={<p>Something went wrong. Please try again later.</p>}>
-            <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
+            <Suspense fallback={<p>Loading PDF...</p>}>
               <PdfViewer
-                isLoading={isLoading}
-                error={error}
+                // isLoading={isLoading}
+                // error={error}
                 currentPdfSource={currentPdfSource}
                 subject={subject}
                 selectedSemester={selectedSemester}
