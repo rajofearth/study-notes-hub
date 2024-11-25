@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileWarning } from "lucide-react"
+import { FileWarning, ThumbsUp, MessageCircle, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteType, isMobile }) => {
   const [pdfError, setPdfError] = useState(false);
@@ -23,6 +24,11 @@ const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteTy
       });
   }, [currentPdfSource]);
 
+  const handleRetry = () => {
+    setPdfError(false);
+    // Attempt to reload the PDF
+  };
+
   if (pdfError) {
     return (
       <div className="w-full h-[400px] border border-input rounded-lg overflow-hidden flex items-center justify-center bg-muted/50">
@@ -36,6 +42,10 @@ const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteTy
             {selectedSemester === "semester1" ? "Semester 1" : "Semester 2"} - {selectedNoteType === "notes" ? "Notes" : "Handwritten Notes"}
           </p>
         </div>
+        <Button onClick={handleRetry}>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -48,6 +58,16 @@ const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteTy
         title={`${subject.title} - ${selectedSemester} ${selectedNoteType}`}
         sandbox="allow-same-origin allow-scripts allow-forms"
       />
+      <div className="flex justify-center gap-4 mt-4">
+        <Button variant="outline" size="sm">
+          <ThumbsUp className="w-4 h-4 mr-2" />
+          Helpful
+        </Button>
+        <Button variant="outline" size="sm">
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Report Issue
+        </Button>
+      </div>
     </div>
   );
 };

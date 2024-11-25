@@ -79,3 +79,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add smooth transitions */
+.subject-card {
+  transition: all 0.3s ease;
+}
+
+.subject-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Add loading skeleton animation */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading-skeleton {
+  animation: pulse 1.5s infinite;
+}

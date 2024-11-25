@@ -25,13 +25,16 @@ export function Breadcrumb({ items }) {
             {index > 0 && (
               <ChevronRight className="w-4 h-4 text-gray-400 mx-1 flex-shrink-0" />
             )}
-            {item.href ? (
-              <a
-                href={item.href}
+            {item.onClick ? (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  item.onClick();
+                }}
                 className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
               >
                 {isMobile ? truncateText(item.label, 15) : item.label}
-              </a>
+              </button>
             ) : (
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
                 {isMobile ? truncateText(item.label, 15) : item.label}

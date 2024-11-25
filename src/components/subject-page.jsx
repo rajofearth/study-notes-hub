@@ -75,13 +75,6 @@ export function SubjectPageJsx({ subject, onBack }) {
   //   return () => clearTimeout(timer)
   // }, [currentPdfSource])
 
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: subject.title },
-    { label: selectedSemester === "semester1" ? "Semester 1" : "Semester 2" },
-    { label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes" },
-  ]
-
   const getSubjectTitle = () => {
     if (selectedSemester === "semester2" && subject.semester2Title) {
       return subject.semester2Title
@@ -89,7 +82,65 @@ export function SubjectPageJsx({ subject, onBack }) {
     return subject.title
   }
 
+  const breadcrumbItems = [
+    { 
+      label: "Home", 
+      onClick: onBack  // Only Home is clickable
+    },
+    { 
+      label: getSubjectTitle()
+    },
+    { 
+      label: selectedSemester === "semester1" ? "Semester 1" : "Semester 2"
+    },
+    { 
+      label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes"
+    }
+  ]
+
   const showSemesterTabs = subject.semesters.length > 1
+
+  // Add touch gestures for mobile
+  const handleSwipe = (direction) => {
+    if (direction === 'left') {
+      // Next note type
+      if (selectedNoteType === 'notes') {
+        handleNoteTypeChange('handwritten');
+      }
+    }
+    if (direction === 'right') {
+      // Previous note type
+      if (selectedNoteType === 'handwritten') {
+        handleNoteTypeChange('notes');
+      }
+    }
+  };
+
+  // Add useEffect to update progress when viewing notes
+  useEffect(() => {
+    // Get stored progress from localStorage
+    const storedProgress = JSON.parse(localStorage.getItem('subjectProgress') || '{}');
+    
+    // Update progress for current subject
+    const updatedProgress = {
+      ...storedProgress,
+      [subject.file]: {
+        ...storedProgress[subject.file],
+        [selectedNoteType]: true
+      }
+    };
+
+    // Save updated progress
+    localStorage.setItem('subjectProgress', JSON.stringify(updatedProgress));
+
+    // Dispatch custom event to notify study-notes-hub
+    window.dispatchEvent(new CustomEvent('progressUpdate', {
+      detail: {
+        subjectFile: subject.file,
+        progress: updatedProgress[subject.file]
+      }
+    }));
+  }, [subject.file, selectedNoteType]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
