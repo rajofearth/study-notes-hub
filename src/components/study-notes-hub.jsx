@@ -11,13 +11,16 @@ export function StudyNotesHubJsx() {
   const [searchTerm, setSearchTerm] = useState("")
 
   const studyTopics = [
-    { title: "Operating System", file: "os", image: "https://images.pexels.com/photos/4584830/pexels-photo-4584830.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "Computer Fundamentals", file: "cf", image: "https://images.pexels.com/photos/4792720/pexels-photo-4792720.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "C Language", file: "c", image: "https://images.pexels.com/photos/52608/pexels-photo-52608.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "Mathematics", file: "m", image: "https://images.pexels.com/photos/5212334/pexels-photo-5212334.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "Communication Skills", file: "cs", image: "https://images.pexels.com/photos/5439371/pexels-photo-5439371.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "Writing Skills", file: "ws", image: "https://images.pexels.com/photos/159581/dictionary-reference-book-learning-meaning-159581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
-    { title: "Hindi", file: "hindi", image: "https://images.pexels.com/photos/4308161/pexels-photo-4308161.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+    { title: "Operating System", file: "os", image: "https://images.pexels.com/photos/4584830/pexels-photo-4584830.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "Computer Fundamentals", file: "cf", image: "https://images.pexels.com/photos/4792720/pexels-photo-4792720.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "C Programming", file: "c", image: "https://images.pexels.com/photos/52608/pexels-photo-52608.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1], semester2Title: "Advanced C Programming" },
+    { title: "Mathematics", file: "m", image: "https://images.pexels.com/photos/5212334/pexels-photo-5212334.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "Communication Skills", file: "cs", image: "https://images.pexels.com/photos/5439371/pexels-photo-5439371.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "Writing Skills", file: "ws", image: "https://images.pexels.com/photos/159581/dictionary-reference-book-learning-meaning-meaning-159581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "Hindi", file: "hindi", image: "https://images.pexels.com/photos/4308161/pexels-photo-4308161.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [1] },
+    { title: "Data Structures", file: "ds", image: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [2] },
+    { title: "Database Management System", file: "dbms", image: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [2] },
+    { title: "Microprocessor 8086", file: "mp", image: "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", semesters: [2] }
   ]
 
   const handleSubjectClick = (subject) => {

@@ -12,7 +12,9 @@ import ErrorBoundary from "@/components/ErrorBoundary"
 const PdfViewer = lazy(() => import("@/components/PdfViewer"))
 
 export function SubjectPageJsx({ subject, onBack }) {
-  const [selectedSemester, setSelectedSemester] = useState("semester1")
+  const [selectedSemester, setSelectedSemester] = useState(() => {
+    return subject.semesters.includes(1) ? "semester1" : "semester2"
+  })
   const [selectedNoteType, setSelectedNoteType] = useState("notes")
   // const [isLoading, setIsLoading] = useState(true)
   // const [error, setError] = useState(null)
@@ -80,6 +82,15 @@ export function SubjectPageJsx({ subject, onBack }) {
     { label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes" },
   ]
 
+  const getSubjectTitle = () => {
+    if (selectedSemester === "semester2" && subject.semester2Title) {
+      return subject.semester2Title
+    }
+    return subject.title
+  }
+
+  const showSemesterTabs = subject.semesters.length > 1
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
@@ -92,29 +103,41 @@ export function SubjectPageJsx({ subject, onBack }) {
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </nav>
-        <h1 className="text-3xl sm:text-4xl font-bold mb-8">{subject.title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8">{getSubjectTitle()}</h1>
         <Card className="mb-8">
           <CardContent className="p-6">
-            <Tabs value={selectedSemester} onValueChange={handleSemesterChange}>
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="semester1">Semester 1</TabsTrigger>
-                <TabsTrigger value="semester2">Semester 2</TabsTrigger>
-              </TabsList>
-              <TabsContent value="semester1">
-                <SemesterContent
-                  semester="semester1"
-                  selectedNoteType={selectedNoteType}
-                  onNoteTypeChange={handleNoteTypeChange}
-                />
-              </TabsContent>
-              <TabsContent value="semester2">
-                <SemesterContent
-                  semester="semester2"
-                  selectedNoteType={selectedNoteType}
-                  onNoteTypeChange={handleNoteTypeChange}
-                />
-              </TabsContent>
-            </Tabs>
+            {showSemesterTabs ? (
+              <Tabs value={selectedSemester} onValueChange={handleSemesterChange}>
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  {subject.semesters.includes(1) && (
+                    <TabsTrigger value="semester1">Semester 1</TabsTrigger>
+                  )}
+                  {subject.semesters.includes(2) && (
+                    <TabsTrigger value="semester2">Semester 2</TabsTrigger>
+                  )}
+                </TabsList>
+                <TabsContent value="semester1">
+                  <SemesterContent
+                    semester="semester1"
+                    selectedNoteType={selectedNoteType}
+                    onNoteTypeChange={handleNoteTypeChange}
+                  />
+                </TabsContent>
+                <TabsContent value="semester2">
+                  <SemesterContent
+                    semester="semester2"
+                    selectedNoteType={selectedNoteType}
+                    onNoteTypeChange={handleNoteTypeChange}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <SemesterContent
+                semester={selectedSemester}
+                selectedNoteType={selectedNoteType}
+                onNoteTypeChange={handleNoteTypeChange}
+              />
+            )}
           </CardContent>
         </Card>
         <section className="mb-8">
