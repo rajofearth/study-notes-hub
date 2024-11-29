@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, lazy, Suspense } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -12,13 +13,18 @@ import ErrorBoundary from "@/components/ErrorBoundary"
 const PdfViewer = lazy(() => import("@/components/PdfViewer"))
 
 export function SubjectPageJsx({ subject, onBack }) {
+  const navigate = useNavigate()
+  const { semesterId, noteType } = useParams()
+  
   const [selectedSemester, setSelectedSemester] = useState(() => {
-    return subject.semesters.includes(1) ? "semester1" : "semester2"
+    return semesterId ? `semester${semesterId}` : (subject.semesters.includes(1) ? "semester1" : "semester2")
   })
-  const [selectedNoteType, setSelectedNoteType] = useState("notes")
+  const [selectedNoteType, setSelectedNoteType] = useState(noteType || "notes")
   // const [isLoading, setIsLoading] = useState(true)
   // const [error, setError] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
 
   useEffect(() => {
     const checkMobile = () => {
@@ -54,10 +60,14 @@ export function SubjectPageJsx({ subject, onBack }) {
   const handleSemesterChange = (value) => {
     setSelectedSemester(value)
     setSelectedNoteType("notes")
+    const semester = value.replace('semester', '')
+    navigate(`/subject/${subject.file}/semester/${semester}/notes`)
   }
 
   const handleNoteTypeChange = (value) => {
     setSelectedNoteType(value)
+    const semester = selectedSemester.replace('semester', '')
+    navigate(`/subject/${subject.file}/semester/${semester}/${value}`)
   }
 
   const currentPdfSource = pdfSources[selectedSemester][selectedNoteType]
@@ -100,21 +110,33 @@ export function SubjectPageJsx({ subject, onBack }) {
 
   const showSemesterTabs = subject.semesters.length > 1
 
-  // Add touch gestures for mobile
-  const handleSwipe = (direction) => {
-    if (direction === 'left') {
-      // Next note type
-      if (selectedNoteType === 'notes') {
-        handleNoteTypeChange('handwritten');
-      }
+  // Minimum swipe distance for a gesture to register (in pixels)
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => {
+    e.preventDefault() // Prevent browser gestures
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe && selectedNoteType === 'notes') {
+      handleNoteTypeChange('handwritten')
     }
-    if (direction === 'right') {
-      // Previous note type
-      if (selectedNoteType === 'handwritten') {
-        handleNoteTypeChange('notes');
-      }
+    if (isRightSwipe && selectedNoteType === 'handwritten') {
+      handleNoteTypeChange('notes')
     }
-  };
+  }
 
   // Add useEffect to update progress when viewing notes
   useEffect(() => {
@@ -137,13 +159,16 @@ export function SubjectPageJsx({ subject, onBack }) {
     window.dispatchEvent(new CustomEvent('progressUpdate', {
       detail: {
         subjectFile: subject.file,
-        progress: updatedProgress[subject.file]
+        progress: {
+          ...storedProgress[subject.file],
+          [selectedNoteType]: true
+        }
       }
     }));
   }, [subject.file, selectedNoteType]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       <Header />
       <main className="container mx-auto px-4 py-8 flex-grow">
         <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from "react"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { SubjectPageJsx } from "./subject-page"
 import { Input } from "@/components/ui/input"
@@ -8,33 +9,15 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Button } from "@/components/ui/button"
 
 export function StudyNotesHubJsx() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { subjectId, semesterId, noteType } = useParams()
+  
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [semesterFilter, setSemesterFilter] = useState('all')
   const [recentlyViewed, setRecentlyViewed] = useState([])
   const [subjectProgress, setSubjectProgress] = useState({})
-
-  // Load progress from localStorage on mount
-  useEffect(() => {
-    const storedProgress = localStorage.getItem('subjectProgress')
-    if (storedProgress) {
-      setSubjectProgress(JSON.parse(storedProgress))
-    }
-  }, [])
-
-  // Listen for progress updates
-  useEffect(() => {
-    const handleProgressUpdate = (event) => {
-      const { subjectFile, progress } = event.detail;
-      setSubjectProgress(prev => ({
-        ...prev,
-        [subjectFile]: progress
-      }));
-    };
-
-    window.addEventListener('progressUpdate', handleProgressUpdate);
-    return () => window.removeEventListener('progressUpdate', handleProgressUpdate);
-  }, []);
 
   const studyTopics = [
     { 
@@ -58,12 +41,79 @@ export function StudyNotesHubJsx() {
     progress: subjectProgress[topic.file] || { notes: false, handwritten: false }
   }))
 
+  // Load progress and recently viewed from localStorage on mount
+  useEffect(() => {
+    const storedProgress = localStorage.getItem('subjectProgress')
+    if (storedProgress) {
+      setSubjectProgress(JSON.parse(storedProgress))
+    }
+
+    const storedRecentlyViewed = localStorage.getItem('recentlyViewed')
+    if (storedRecentlyViewed) {
+      const parsedRecent = JSON.parse(storedRecentlyViewed)
+      // Ensure the stored subjects have all required properties by matching with studyTopics
+      const validRecent = parsedRecent.map(recentSubject => {
+        const fullSubject = studyTopics.find(topic => topic.file === recentSubject.file)
+        return fullSubject || recentSubject
+      })
+      setRecentlyViewed(validRecent)
+    }
+  }, [])
+
+  // Listen for progress updates
+  useEffect(() => {
+    const handleProgressUpdate = (event) => {
+      const { subjectFile, progress } = event.detail;
+      const updatedProgress = {
+        ...subjectProgress,
+        [subjectFile]: progress
+      };
+      setSubjectProgress(updatedProgress);
+      // Save to localStorage
+      localStorage.setItem('subjectProgress', JSON.stringify(updatedProgress));
+    };
+
+    window.addEventListener('progressUpdate', handleProgressUpdate);
+    return () => window.removeEventListener('progressUpdate', handleProgressUpdate);
+  }, [subjectProgress]);
+
+  // Update URL when subject is selected
+  useEffect(() => {
+    if (selectedSubject) {
+      const semester = semesterId || selectedSubject.semesters[0]
+      const notes = noteType || 'notes'
+      navigate(`/subject/${selectedSubject.file}/semester/${semester}/${notes}`)
+    }
+  }, [selectedSubject, semesterId, noteType, navigate])
+
+  // Load subject from URL params on mount
+  useEffect(() => {
+    if (subjectId && !selectedSubject) {
+      const subject = studyTopics.find(topic => topic.file === subjectId)
+      if (subject) {
+        setSelectedSubject(subject)
+        // Update recently viewed
+        const updatedRecent = [subject, ...recentlyViewed.filter(item => item.file !== subject.file)].slice(0, 4)
+        setRecentlyViewed(updatedRecent)
+        localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent))
+      }
+    }
+  }, [subjectId, studyTopics, recentlyViewed])
+
   const handleSubjectClick = (subject) => {
     // Update recently viewed
     const updatedRecent = [subject, ...recentlyViewed.filter(item => item.file !== subject.file)].slice(0, 4)
     setRecentlyViewed(updatedRecent)
     localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent))
     setSelectedSubject(subject)
+    // Navigate to the subject's page with default semester and note type
+    const defaultSemester = subject.semesters[0]
+    navigate(`/subject/${subject.file}/semester/${defaultSemester}/notes`)
+  }
+
+  const handleBack = () => {
+    setSelectedSubject(null)
+    navigate('/')
   }
 
   const getAllSubjects = () => {
@@ -91,7 +141,7 @@ export function StudyNotesHubJsx() {
   const filteredTopics = getAllSubjects();
 
   if (selectedSubject) {
-    return <SubjectPageJsx subject={selectedSubject} onBack={() => setSelectedSubject(null)} />;
+    return <SubjectPageJsx subject={selectedSubject} onBack={handleBack} />;
   }
 
   const SubjectCard = ({ topic }) => (

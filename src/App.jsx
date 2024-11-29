@@ -7,7 +7,8 @@ function App() {
     <ThemeProvider>
       <Router basename="/study-notes-hub">
         <Routes>
-          <Route path="/pdfs/*" element={null} />
+          <Route path="/" element={<StudyNotesHubJsx />} />
+          <Route path="/subject/:subjectId/semester/:semesterId/:noteType" element={<StudyNotesHubJsx />} />
           <Route path="*" element={<StudyNotesHubJsx />} />
         </Routes>
       </Router>
