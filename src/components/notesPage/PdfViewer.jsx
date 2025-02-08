@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileWarning, ThumbsUp, MessageCircle, RefreshCw } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { FileWarning, ThumbsUp, MessageCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteType, isMobile }) => {
   const [pdfError, setPdfError] = useState(false);
@@ -31,7 +31,7 @@ const PdfViewer = ({ currentPdfSource, subject, selectedSemester, selectedNoteTy
 
   if (pdfError) {
     return (
-      <div className="w-full h-[400px] border border-input rounded-lg overflow-hidden flex items-center justify-center bg-muted/50">
+      <div className="w-full h-[400px] border border-input rounded-lg overflow-hidden flex flex-col items-center justify-center bg-muted/50">
         <div className="text-center p-6">
           <FileWarning className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">PDF Not Available</h3>

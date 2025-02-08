@@ -1,40 +1,36 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, lazy, Suspense } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download } from "lucide-react"
-import { Breadcrumb } from "@/components/ui/breadcrumb"
-import { Header } from "./Header"
-import ErrorBoundary from "@/components/ErrorBoundary"
-
-const PdfViewer = lazy(() => import("@/components/PdfViewer"))
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Header } from "./Header";
+import NavigationBar from "@/components/notesPage/NavigationBar";
+import SemesterTabs from "@/components/notesPage/SemesterTabs";
+import PdfViewerSection from "@/components/notesPage/PdfViewerSection";
 
 export function SubjectPageJsx({ subject, onBack }) {
-  const navigate = useNavigate()
-  const { semesterId, noteType } = useParams()
-  
+  const navigate = useNavigate();
+  const { semesterId, noteType } = useParams();
+
   const [selectedSemester, setSelectedSemester] = useState(() => {
-    return semesterId ? `semester${semesterId}` : (subject.semesters.includes(1) ? "semester1" : "semester2")
-  })
-  const [selectedNoteType, setSelectedNoteType] = useState(noteType || "notes")
-  // const [isLoading, setIsLoading] = useState(true)
-  // const [error, setError] = useState(null)
-  const [isMobile, setIsMobile] = useState(false)
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
+    return semesterId
+      ? `semester${semesterId}`
+      : (subject.semesters.includes(1) ? "semester1" : "semester2");
+  });
+  const [selectedNoteType, setSelectedNoteType] = useState(noteType || "notes");
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
+  // Update mobile state on resize
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
+  // Define PDF sources
   const pdfSources = {
     semester1: {
       notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s1.pdf`,
@@ -44,7 +40,7 @@ export function SubjectPageJsx({ subject, onBack }) {
       notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s2.pdf`,
       handwritten: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s2.pdf`,
     },
-  }
+  };
 
   const rawPdfSources = {
     semester1: {
@@ -55,212 +51,126 @@ export function SubjectPageJsx({ subject, onBack }) {
       notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s2.pdf`,
       handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s2.pdf`,
     },
-  }
+  };
 
+  // Handle semester change from SemesterTabs
   const handleSemesterChange = (value) => {
-    setSelectedSemester(value)
-    setSelectedNoteType("notes")
-    const semester = value.replace('semester', '')
-    navigate(`/subject/${subject.file}/semester/${semester}/notes`)
-  }
+    setSelectedSemester(value);
+    setSelectedNoteType("notes");
+    const semester = value.replace("semester", "");
+    navigate(`/subject/${subject.file}/semester/${semester}/notes`);
+  };
 
+  // Handle note type change from SemesterTabs
   const handleNoteTypeChange = (value) => {
-    setSelectedNoteType(value)
-    const semester = selectedSemester.replace('semester', '')
-    navigate(`/subject/${subject.file}/semester/${semester}/${value}`)
-  }
+    setSelectedNoteType(value);
+    const semester = selectedSemester.replace("semester", "");
+    navigate(`/subject/${subject.file}/semester/${semester}/${value}`);
+  };
 
-  const currentPdfSource = pdfSources[selectedSemester][selectedNoteType]
-  const currentRawPdfSource = rawPdfSources[selectedSemester][selectedNoteType]
+  const currentPdfSource = pdfSources[selectedSemester][selectedNoteType];
+  const currentRawPdfSource = rawPdfSources[selectedSemester][selectedNoteType];
 
-  // useEffect(() => {
-  //   setIsLoading(true)
-  //   setError(null)
-  //   const timer = setTimeout(() => {
-  //     if (Math.random() > 0.9) {
-  //       setError("Failed to load PDF. Please try again.")
-  //     }
-  //     setIsLoading(false)
-  //   }, 1000)
-  //   return () => clearTimeout(timer)
-  // }, [currentPdfSource])
-
-  const getSubjectTitle = () => {
-    if (selectedSemester === "semester2" && subject.semester2Title) {
-      return subject.semester2Title
-    }
-    return subject.title
-  }
-
-  const breadcrumbItems = [
-    { 
-      label: "Home", 
-      onClick: onBack  // Only Home is clickable
-    },
-    { 
-      label: getSubjectTitle()
-    },
-    { 
-      label: selectedSemester === "semester1" ? "Semester 1" : "Semester 2"
-    },
-    { 
-      label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes"
-    }
-  ]
-
-  const showSemesterTabs = subject.semesters.length > 1
-
-  // Minimum swipe distance for a gesture to register (in pixels)
-  const minSwipeDistance = 50
-
-  const onTouchStart = (e) => {
-    setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const onTouchMove = (e) => {
-    e.preventDefault() // Prevent browser gestures
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-    
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
-
-    if (isLeftSwipe && selectedNoteType === 'notes') {
-      handleNoteTypeChange('handwritten')
-    }
-    if (isRightSwipe && selectedNoteType === 'handwritten') {
-      handleNoteTypeChange('notes')
-    }
-  }
-
-  // Add useEffect to update progress when viewing notes
+  // Update progress when viewing a note type
   useEffect(() => {
-    // Get stored progress from localStorage
-    const storedProgress = JSON.parse(localStorage.getItem('subjectProgress') || '{}');
-    
-    // Update progress for current subject
+    const storedProgress = JSON.parse(localStorage.getItem("subjectProgress") || "{}");
     const updatedProgress = {
       ...storedProgress,
       [subject.file]: {
         ...storedProgress[subject.file],
-        [selectedNoteType]: true
-      }
+        [selectedNoteType]: true,
+      },
     };
-
-    // Save updated progress
-    localStorage.setItem('subjectProgress', JSON.stringify(updatedProgress));
-
-    // Dispatch custom event to notify study-notes-hub
-    window.dispatchEvent(new CustomEvent('progressUpdate', {
-      detail: {
-        subjectFile: subject.file,
-        progress: {
-          ...storedProgress[subject.file],
-          [selectedNoteType]: true
-        }
-      }
-    }));
+    localStorage.setItem("subjectProgress", JSON.stringify(updatedProgress));
+    window.dispatchEvent(
+      new CustomEvent("progressUpdate", {
+        detail: {
+          subjectFile: subject.file,
+          progress: {
+            ...storedProgress[subject.file],
+            [selectedNoteType]: true,
+          },
+        },
+      })
+    );
   }, [subject.file, selectedNoteType]);
 
+  // Touch events for swipe gestures
+  const minSwipeDistance = 50;
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMove = (e) => {
+    e.preventDefault();
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe && selectedNoteType === "notes") {
+      handleNoteTypeChange("handwritten");
+    }
+    if (isRightSwipe && selectedNoteType === "handwritten") {
+      handleNoteTypeChange("notes");
+    }
+  };
+
+  // Get the appropriate subject title (for example, if semester2 has a special title)
+  const getSubjectTitle = () => {
+    if (selectedSemester === "semester2" && subject.semester2Title) {
+      return subject.semester2Title;
+    }
+    return subject.title;
+  };
+
+  // Breadcrumb items for NavigationBar
+  const breadcrumbItems = [
+    { label: "Home", onClick: onBack },
+    { label: getSubjectTitle() },
+    { label: selectedSemester === "semester1" ? "Semester 1" : "Semester 2" },
+    { label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes" },
+  ];
+
+  const showSemesterTabs = subject.semesters.length > 1;
+
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+    <div
+      className="flex flex-col min-h-screen bg-background text-foreground"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <Header />
       <main className="container mx-auto px-4 py-8 flex-grow">
-        <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <Button variant="ghost" onClick={onBack} className="mb-4 sm:mb-0" aria-label="Go back">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-          <div className="w-full sm:w-auto">
-            <Breadcrumb items={breadcrumbItems} />
-          </div>
-        </nav>
-        <h1 className="text-3xl sm:text-4xl font-bold mb-8">{getSubjectTitle()}</h1>
+        <NavigationBar
+          onBack={onBack}
+          breadcrumbItems={breadcrumbItems}
+          subjectTitle={getSubjectTitle()}
+        />
         <Card className="mb-8">
           <CardContent className="p-6">
-            {showSemesterTabs ? (
-              <Tabs value={selectedSemester} onValueChange={handleSemesterChange}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  {subject.semesters.includes(1) && (
-                    <TabsTrigger value="semester1">Semester 1</TabsTrigger>
-                  )}
-                  {subject.semesters.includes(2) && (
-                    <TabsTrigger value="semester2">Semester 2</TabsTrigger>
-                  )}
-                </TabsList>
-                <TabsContent value="semester1">
-                  <SemesterContent
-                    semester="semester1"
-                    selectedNoteType={selectedNoteType}
-                    onNoteTypeChange={handleNoteTypeChange}
-                  />
-                </TabsContent>
-                <TabsContent value="semester2">
-                  <SemesterContent
-                    semester="semester2"
-                    selectedNoteType={selectedNoteType}
-                    onNoteTypeChange={handleNoteTypeChange}
-                  />
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <SemesterContent
-                semester={selectedSemester}
-                selectedNoteType={selectedNoteType}
-                onNoteTypeChange={handleNoteTypeChange}
-              />
-            )}
+            <SemesterTabs
+              showSemesterTabs={showSemesterTabs}
+              subject={subject}
+              selectedSemester={selectedSemester}
+              selectedNoteType={selectedNoteType}
+              onSemesterChange={handleSemesterChange}
+              onNoteTypeChange={handleNoteTypeChange}
+            />
           </CardContent>
         </Card>
-        <section className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold">PDF Viewer</h2>
-            <Button 
-              onClick={() => window.open(currentRawPdfSource, '_blank')} 
-              aria-label="Download PDF"
-              size="sm"
-            >
-              <Download className="mr-2 h-4 w-4" /> Download PDF
-            </Button>
-          </div>
-          <ErrorBoundary fallback={<p>Something went wrong. Please try again later.</p>}>
-            <Suspense fallback={<p>Loading PDF...</p>}>
-              <PdfViewer
-                // isLoading={isLoading}
-                // error={error}
-                currentPdfSource={currentPdfSource}
-                subject={subject}
-                selectedSemester={selectedSemester}
-                selectedNoteType={selectedNoteType}
-                isMobile={isMobile}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        </section>
+        <PdfViewerSection
+          currentPdfSource={currentPdfSource}
+          currentRawPdfSource={currentRawPdfSource}
+          isMobile={isMobile}
+          subject={subject}
+          selectedSemester={selectedSemester}
+          selectedNoteType={selectedNoteType}
+        />
       </main>
     </div>
-  )
-}
-
-const SemesterContent = React.memo(({ semester, selectedNoteType, onNoteTypeChange }) => {
-  return (
-    <Tabs value={selectedNoteType} onValueChange={onNoteTypeChange}>
-      <TabsList className="grid w-full grid-cols-2 mb-4">
-        <TabsTrigger value="notes">Notes</TabsTrigger>
-        <TabsTrigger value="handwritten">Handwritten Notes</TabsTrigger>
-      </TabsList>
-      <TabsContent value="notes">
-        <p className="text-sm text-muted-foreground">Viewing {semester} notes</p>
-      </TabsContent>
-      <TabsContent value="handwritten">
-        <p className="text-sm text-muted-foreground">Viewing {semester} handwritten notes</p>
-      </TabsContent>
-    </Tabs>
   );
-})
-
-SemesterContent.displayName = 'SemesterContent'
+}
