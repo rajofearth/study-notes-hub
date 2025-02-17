@@ -6,7 +6,7 @@
 
 ## 🌐 Live Website
 
-Access the live site at [Study Notes Hub](https://rajofearth.github.io/study-notes-hub/).
+Access the live site at [Study Notes Hub](https://study-notes-hub.vercel.app/).
 
 ## 📑 Key Features
 
