@@ -1,9 +1,9 @@
 {
   "name": "study-notes",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
-  "homepage": "https://rajofearth.github.io/study-notes-hub",
+  "homepage": "https://study-notes-hub.vercel.app/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
