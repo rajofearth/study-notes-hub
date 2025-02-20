@@ -52,7 +52,7 @@ export function StudyNotesHubJsx() {
     { 
       title: "Writing Skills", 
       file: "ws", 
-      image: "https://images.pexels.com/photos/159581/dictionary-reference-book-learning-meaning-meaning-159581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      image: "https://images.pexels.com/photos/1766604/pexels-photo-1766604.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
       semesters: [1],
     },
     { 
