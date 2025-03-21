@@ -47,7 +47,8 @@ export function StudyNotesHubJsx() {
       title: "Communication Skills", 
       file: "cs", 
       image: "https://images.pexels.com/photos/5439371/pexels-photo-5439371.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      semesters: [1],
+      semesters: [1, 2],
+      semester2Title: "Communication Skills",
     },
     { 
       title: "Writing Skills", 
