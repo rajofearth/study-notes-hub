@@ -79,6 +79,12 @@ export function StudyNotesHubJsx() {
       file: "mp", 
       image: "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
       semesters: [2],
+    },
+    { 
+      title: "Constitution Of India", 
+      file: "coi", 
+      image: "https://images.pexels.com/photos/19883686/pexels-photo-19883686/free-photo-of-rashtrapati-bhavan-presidential-palace-in-new-delhi-india.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      semesters: [2],
     }
   ];
 
