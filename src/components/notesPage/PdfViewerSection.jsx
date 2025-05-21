@@ -8,12 +8,14 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 const PdfViewer = lazy(() => import("@/components/notesPage/PdfViewer"));
 
 const PdfViewerSection = ({
-  currentPdfSource,
   currentRawPdfSource,
   isMobile,
   subject,
   selectedSemester,
   selectedNoteType,
+  pdfSearchTerm,
+  onSearchResults,
+  viewerRef, // This is the ref received from SubjectPageJsx
 }) => {
   return (
     <section className="mb-8">
@@ -23,6 +25,7 @@ const PdfViewerSection = ({
           onClick={() => window.open(currentRawPdfSource, "_blank")}
           aria-label="Download PDF"
           size="sm"
+          disabled={!currentRawPdfSource}
         >
           <Download className="mr-2 h-4 w-4" /> Download PDF
         </Button>
@@ -30,11 +33,14 @@ const PdfViewerSection = ({
       <ErrorBoundary fallback={<p>Something went wrong. Please try again later.</p>}>
         <Suspense fallback={<p>Loading PDF...</p>}>
           <PdfViewer
-            currentPdfSource={currentPdfSource}
+            fileUrl={currentRawPdfSource}
             subject={subject}
             selectedSemester={selectedSemester}
             selectedNoteType={selectedNoteType}
             isMobile={isMobile}
+            pdfSearchTerm={pdfSearchTerm}
+            onSearchResults={onSearchResults}
+            ref={viewerRef} // Corrected: was viewerRef={viewerRef}
           />
         </Suspense>
       </ErrorBoundary>

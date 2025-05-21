@@ -11,12 +11,12 @@ export function StudyNotesHubJsx() {
   const { subjectId, semesterId, noteType } = useParams();
   
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); 
   const [semesterFilter, setSemesterFilter] = useState('all');
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [subjectProgress, setSubjectProgress] = useState({});
+  const [pinnedSubjects, setPinnedSubjects] = useState([]); 
 
-  // Define the study topics data
   const studyTopicsData = [
     { 
       title: "Operating System", 
@@ -88,13 +88,11 @@ export function StudyNotesHubJsx() {
     }
   ];
 
-  // Append progress to each topic
   const studyTopics = studyTopicsData.map(topic => ({
     ...topic,
     progress: subjectProgress[topic.file] || { notes: false, handwritten: false }
   }));
 
-  // Load progress and recently viewed from localStorage on mount
   useEffect(() => {
     const storedProgress = localStorage.getItem('subjectProgress');
     if (storedProgress) {
@@ -103,16 +101,29 @@ export function StudyNotesHubJsx() {
     const storedRecentlyViewed = localStorage.getItem('recentlyViewed');
     if (storedRecentlyViewed) {
       const parsedRecent = JSON.parse(storedRecentlyViewed);
-      // Validate each stored subject against our study topics
       const validRecent = parsedRecent.map(recentSubject => {
         const fullSubject = studyTopics.find(topic => topic.file === recentSubject.file);
         return fullSubject || recentSubject;
       });
       setRecentlyViewed(validRecent);
     }
+    const storedPinnedSubjects = localStorage.getItem('pinnedSubjects');
+    if (storedPinnedSubjects) {
+      try {
+        const parsedPinnedSubjects = JSON.parse(storedPinnedSubjects);
+        if (Array.isArray(parsedPinnedSubjects) && parsedPinnedSubjects.every(item => typeof item === 'string')) {
+          setPinnedSubjects(parsedPinnedSubjects);
+        } else {
+          console.warn("Stored pinnedSubjects is not a valid array of strings. Resetting.");
+          localStorage.setItem('pinnedSubjects', JSON.stringify([]));
+        }
+      } catch (e) {
+        console.error("Failed to parse pinnedSubjects from localStorage", e);
+        localStorage.setItem('pinnedSubjects', JSON.stringify([]));
+      }
+    }
   }, []);
 
-  // Listen for progress updates via a custom event
   useEffect(() => {
     const handleProgressUpdate = (event) => {
       const { subjectFile, progress } = event.detail;
@@ -124,7 +135,6 @@ export function StudyNotesHubJsx() {
     return () => window.removeEventListener('progressUpdate', handleProgressUpdate);
   }, [subjectProgress]);
 
-  // Update URL when a subject is selected
   useEffect(() => {
     if (selectedSubject) {
       const semester = semesterId || selectedSubject.semesters[0];
@@ -133,7 +143,6 @@ export function StudyNotesHubJsx() {
     }
   }, [selectedSubject, semesterId, noteType, navigate]);
 
-  // If a subject is provided in the URL params, select it on mount
   useEffect(() => {
     if (subjectId && !selectedSubject) {
       const subject = studyTopics.find(topic => topic.file === subjectId);
@@ -151,48 +160,93 @@ export function StudyNotesHubJsx() {
     setRecentlyViewed(updatedRecent);
     localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent));
     setSelectedSubject(subject);
-    // Navigate with default semester and note type
     const defaultSemester = subject.semesters[0];
     navigate(`/subject/${subject.file}/semester/${defaultSemester}/notes`);
   };
 
   const handleBack = () => {
     setSelectedSubject(null);
+    setSearchTerm(''); // Clear search term
     navigate('/');
   };
 
-  // Combine recently viewed with all subjects and apply filters
   const getAllSubjects = () => {
-    const recentIds = new Set(recentlyViewed.map(subject => subject.file));
-    const otherSubjects = studyTopics.filter(subject => !recentIds.has(subject.file));
-    let allSubjects = [...recentlyViewed, ...otherSubjects];
+    let filteredInitialList = [...studyTopics];
     if (semesterFilter !== 'all') {
-      allSubjects = allSubjects.filter(topic => topic.semesters.includes(semesterFilter));
-    }
-    if (searchTerm) {
-      allSubjects = allSubjects.filter(topic =>
-        topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        topic.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filteredInitialList = filteredInitialList.filter(topic => 
+        topic.semesters.includes(semesterFilter)
       );
     }
-    return allSubjects;
+    if (searchTerm && !selectedSubject) { 
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      filteredInitialList = filteredInitialList.filter(topic =>
+        topic.title.toLowerCase().includes(lowerSearchTerm) ||
+        topic.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm))
+      );
+    }
+    const filteredInitialMap = new Map(filteredInitialList.map(subject => [subject.file, subject]));
+    const orderedPinned = [];
+    const orderedRecentlyViewedNotPinned = [];
+    const finalOtherSubjects = [];
+    const pinnedFileIds = new Set(pinnedSubjects);
+    const processedFileIds = new Set();
+
+    for (const pinnedFileId of pinnedSubjects) {
+      if (filteredInitialMap.has(pinnedFileId)) {
+        orderedPinned.push(filteredInitialMap.get(pinnedFileId));
+        processedFileIds.add(pinnedFileId);
+      }
+    }
+    for (const recentSubject of recentlyViewed) {
+      const recentFileId = recentSubject.file;
+      if (filteredInitialMap.has(recentFileId) && !pinnedFileIds.has(recentFileId)) {
+        orderedRecentlyViewedNotPinned.push(filteredInitialMap.get(recentFileId));
+        processedFileIds.add(recentFileId);
+      }
+    }
+    for (const subject of filteredInitialList) {
+      if (!processedFileIds.has(subject.file)) {
+        finalOtherSubjects.push(subject);
+      }
+    }
+    return [...orderedPinned, ...orderedRecentlyViewedNotPinned, ...finalOtherSubjects];
   };
 
   const filteredTopics = getAllSubjects();
 
+  const handlePinSubjectClick = (subjectToToggle) => {
+    const subjectFile = subjectToToggle.file;
+    let newPinnedSubjects;
+    if (pinnedSubjects.includes(subjectFile)) {
+      newPinnedSubjects = pinnedSubjects.filter(file => file !== subjectFile);
+    } else {
+      newPinnedSubjects = [...pinnedSubjects, subjectFile];
+    }
+    setPinnedSubjects(newPinnedSubjects);
+    localStorage.setItem('pinnedSubjects', JSON.stringify(newPinnedSubjects));
+  };
+
   if (selectedSubject) {
-    return <SubjectPageJsx subject={selectedSubject} onBack={handleBack} />;
+    return (
+      <SubjectPageJsx 
+        subject={selectedSubject} 
+        onBack={handleBack} 
+        pdfSearchTerm={searchTerm} 
+      />
+    );
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header />
+      <Header 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm} 
+        isPdfView={false} 
+      />
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
           <h1 className="text-3xl font-bold mb-8 text-center">All Subjects</h1>
           <SubjectFilter 
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
             semesterFilter={semesterFilter}
             onSemesterFilterChange={setSemesterFilter}
           />
@@ -200,6 +254,8 @@ export function StudyNotesHubJsx() {
             topics={filteredTopics}
             onSubjectClick={handleSubjectClick}
             recentlyViewed={recentlyViewed}
+            pinnedSubjects={pinnedSubjects}
+            onPinClick={handlePinSubjectClick}
           />
           {filteredTopics.length === 0 && (
             <p className="text-center text-muted-foreground mt-8">

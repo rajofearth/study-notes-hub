@@ -1,16 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; 
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Header } from "./Header";
+import { Button } from "@/components/ui/button"; 
+import { ChevronLeft, ChevronRight } from "lucide-react"; 
+import { Header } from "./Header"; 
 import NavigationBar from "@/components/notesPage/NavigationBar";
 import SemesterTabs from "@/components/notesPage/SemesterTabs";
 import PdfViewerSection from "@/components/notesPage/PdfViewerSection";
+import PdfSearchResultsPane from "@/components/pdfSearch/PdfSearchResultsPane"; // Step 1: Import
 
-export function SubjectPageJsx({ subject, onBack }) {
+export function SubjectPageJsx({ subject, onBack, pdfSearchTerm }) {
   const navigate = useNavigate();
   const { semesterId, noteType } = useParams();
+  
+  const [currentSearchInPdf, setCurrentSearchInPdf] = useState(pdfSearchTerm || '');
+  const [pdfMatches, setPdfMatches] = useState([]); 
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0); // 0-based internal state
+  const pdfViewerRef = useRef(null); 
+
+  // Step 4: Ensure useEffect for resetting matches is correct
+  useEffect(() => {
+    setCurrentSearchInPdf(pdfSearchTerm || ''); 
+    setPdfMatches([]); 
+    setCurrentMatchIndex(0); 
+  }, [pdfSearchTerm]);
 
   const [selectedSemester, setSelectedSemester] = useState(() => {
     return semesterId
@@ -21,8 +36,7 @@ export function SubjectPageJsx({ subject, onBack }) {
   const [isMobile, setIsMobile] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-
-  // Update mobile state on resize
+  
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
@@ -30,7 +44,6 @@ export function SubjectPageJsx({ subject, onBack }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Define PDF sources
   const pdfSources = {
     semester1: {
       notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s1.pdf`,
@@ -53,56 +66,53 @@ export function SubjectPageJsx({ subject, onBack }) {
     },
   };
 
-  // Handle semester change from SemesterTabs
   const handleSemesterChange = (value) => {
     setSelectedSemester(value);
-    setSelectedNoteType("notes");
+    setSelectedNoteType("notes"); 
     const semester = value.replace("semester", "");
     navigate(`/subject/${subject.file}/semester/${semester}/notes`);
   };
 
-  // Handle note type change from SemesterTabs
   const handleNoteTypeChange = (value) => {
     setSelectedNoteType(value);
     const semester = selectedSemester.replace("semester", "");
     navigate(`/subject/${subject.file}/semester/${semester}/${value}`);
   };
 
-  const currentPdfSource = pdfSources[selectedSemester][selectedNoteType];
-  const currentRawPdfSource = rawPdfSources[selectedSemester][selectedNoteType];
+  const currentPdfSource = pdfSources[selectedSemester]?.[selectedNoteType];
+  const currentRawPdfSource = rawPdfSources[selectedSemester]?.[selectedNoteType];
 
-  // Update progress when viewing a note type
   useEffect(() => {
     const storedProgress = JSON.parse(localStorage.getItem("subjectProgress") || "{}");
-    const updatedProgress = {
-      ...storedProgress,
-      [subject.file]: {
-        ...storedProgress[subject.file],
-        [selectedNoteType]: true,
-      },
-    };
-    localStorage.setItem("subjectProgress", JSON.stringify(updatedProgress));
-    window.dispatchEvent(
-      new CustomEvent("progressUpdate", {
-        detail: {
-          subjectFile: subject.file,
-          progress: {
-            ...storedProgress[subject.file],
-            [selectedNoteType]: true,
-          },
+    const subjectFileProgress = storedProgress[subject.file] || { notes: false, handwritten: false };
+    
+    if (!subjectFileProgress[selectedNoteType]) { 
+      const updatedProgress = {
+        ...storedProgress,
+        [subject.file]: {
+          ...subjectFileProgress,
+          [selectedNoteType]: true,
         },
-      })
-    );
+      };
+      localStorage.setItem("subjectProgress", JSON.stringify(updatedProgress));
+      window.dispatchEvent(
+        new CustomEvent("progressUpdate", {
+          detail: {
+            subjectFile: subject.file,
+            progress: updatedProgress[subject.file],
+          },
+        })
+      );
+    }
   }, [subject.file, selectedNoteType]);
 
-  // Touch events for swipe gestures
   const minSwipeDistance = 50;
   const onTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
   const onTouchMove = (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     setTouchEnd(e.targetTouches[0].clientX);
   };
   const onTouchEnd = () => {
@@ -110,15 +120,14 @@ export function SubjectPageJsx({ subject, onBack }) {
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe && selectedNoteType === "notes") {
+    if (isLeftSwipe && selectedNoteType === "notes" && subject.semesters.some(s => rawPdfSources[`semester${s}`]?.handwritten)) {
       handleNoteTypeChange("handwritten");
     }
-    if (isRightSwipe && selectedNoteType === "handwritten") {
+    if (isRightSwipe && selectedNoteType === "handwritten" && subject.semesters.some(s => rawPdfSources[`semester${s}`]?.notes)) {
       handleNoteTypeChange("notes");
     }
   };
 
-  // Get the appropriate subject title (for example, if semester2 has a special title)
   const getSubjectTitle = () => {
     if (selectedSemester === "semester2" && subject.semester2Title) {
       return subject.semester2Title;
@@ -126,7 +135,6 @@ export function SubjectPageJsx({ subject, onBack }) {
     return subject.title;
   };
 
-  // Breadcrumb items for NavigationBar
   const breadcrumbItems = [
     { label: "Home", onClick: onBack },
     { label: getSubjectTitle() },
@@ -136,6 +144,31 @@ export function SubjectPageJsx({ subject, onBack }) {
 
   const showSemesterTabs = subject.semesters.length > 1;
 
+  const handleSearchResults = (matches) => {
+    setPdfMatches(matches || []);
+    setCurrentMatchIndex(0); 
+  };
+
+  // Step 2: Update Search Navigation Logic
+  const handleJumpToMatch = (oneBasedMatchIndex) => { 
+    if (pdfViewerRef.current && pdfViewerRef.current.jumpToMatch && oneBasedMatchIndex > 0 && oneBasedMatchIndex <= pdfMatches.length) {
+      pdfViewerRef.current.jumpToMatch(oneBasedMatchIndex);
+      setCurrentMatchIndex(oneBasedMatchIndex - 1); 
+    }
+  };
+
+  const handlePreviousMatch = () => {
+    if (pdfMatches.length === 0) return;
+    const newZeroBasedIndex = currentMatchIndex === 0 ? pdfMatches.length - 1 : currentMatchIndex - 1;
+    handleJumpToMatch(newZeroBasedIndex + 1);
+  };
+
+  const handleNextMatch = () => {
+    if (pdfMatches.length === 0) return;
+    const newZeroBasedIndex = (currentMatchIndex + 1) % pdfMatches.length;
+    handleJumpToMatch(newZeroBasedIndex + 1);
+  };
+
   return (
     <div
       className="flex flex-col min-h-screen bg-background text-foreground"
@@ -143,7 +176,11 @@ export function SubjectPageJsx({ subject, onBack }) {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <Header />
+      <Header 
+        searchTerm={currentSearchInPdf}
+        onSearchChange={setCurrentSearchInPdf}
+        isPdfView={true} 
+      />
       <main className="container mx-auto px-4 py-8 flex-grow">
         <NavigationBar
           onBack={onBack}
@@ -162,13 +199,49 @@ export function SubjectPageJsx({ subject, onBack }) {
             />
           </CardContent>
         </Card>
+
+        {/* Step 3: Modify the Search Results Display Section */}
+        {currentSearchInPdf && (
+          <div className="my-4 p-4 border rounded-lg bg-card">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">
+                {pdfMatches.length > 0 
+                  ? `Found ${pdfMatches.length} match${pdfMatches.length === 1 ? '' : 'es'}. Viewing match ${currentMatchIndex + 1}.`
+                  : (currentSearchInPdf && pdfMatches.length === 0 && currentSearchInPdf.trim() !== '' ? 'No matches found.' : '') 
+                  // Added check for currentSearchInPdf.trim() to avoid "No matches" when search is empty
+                }
+              </p>
+              {pdfMatches.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={handlePreviousMatch} aria-label="Previous match">
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleNextMatch} aria-label="Next match">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            {/* Render PdfSearchResultsPane only if there are matches and a search term */}
+            {currentSearchInPdf.trim() !== '' && pdfMatches.length > 0 && (
+              <PdfSearchResultsPane 
+                matches={pdfMatches}
+                onSelectMatch={handleJumpToMatch} 
+                currentMatchIndex={currentMatchIndex + 1} 
+              />
+            )}
+          </div>
+        )}
+
         <PdfViewerSection
-          currentPdfSource={currentPdfSource}
           currentRawPdfSource={currentRawPdfSource}
           isMobile={isMobile}
           subject={subject}
           selectedSemester={selectedSemester}
           selectedNoteType={selectedNoteType}
+          pdfSearchTerm={currentSearchInPdf}
+          onSearchResults={handleSearchResults} 
+          viewerRef={pdfViewerRef} 
         />
       </main>
     </div>
