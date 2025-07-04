@@ -68,8 +68,6 @@ To create a production build:
 npm run build
 ```
 
-The optimized files will be located in the `dist` directory.
-
 ## 📝 Usage Guide
 
 - **Home Page**: Browse through available subjects and use the search bar for specific topics.
@@ -82,7 +80,22 @@ The optimized files will be located in the `dist` directory.
 
 ## 🤝 Contributing
 
-We welcome contributions! Feel free to submit a Pull Request or create an Issue for any suggestions or improvements.
+We welcome contributions! Whether you want to add new subjects, improve existing features, or fix bugs, your help is appreciated.
+
+**For detailed contribution guidelines**, please read our [CONTRIBUTORS.md](./CONTRIBUTORS.md) file which includes:
+- 🚀 Complete setup instructions
+- 🏗️ Project architecture explanation
+- 📚 How to add new subjects and notes
+- ⚙️ Local development configuration
+- 🐛 Troubleshooting guide
+
+**Quick Start for Contributors**:
+1. Fork the repository
+2. Read [CONTRIBUTORS.md](./CONTRIBUTORS.md) for detailed setup
+3. Make your changes
+4. Submit a Pull Request
+
+Feel free to create an Issue for any questions, suggestions, or bug reports.
 
 ## 📧 Contact
 
@@ -95,13 +108,5 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 ---
 
 Thank you for exploring Study Notes Hub! Enhance your learning journey with easy access to valuable resources. 🎓📖
-
----
-
-### Additional Configuration Files
-
-- **Package Configuration** (`package.json`): Defines dependencies, scripts, and settings for the project.
-- **Vite Configuration** (`vite.config.js`): Configures Vite with plugins, build options, and custom middleware.
-- **Main Application Component** (`src/App.jsx`): Sets up routing, theme provider, and the main component structure.
 
 ---
