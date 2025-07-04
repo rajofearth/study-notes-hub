@@ -4,15 +4,14 @@ Welcome to the Study Notes Hub project! This guide will help you set up the proj
 
 ## 📋 Table of Contents
 
-- [Quick Setup](#-quick-setup)
-- [Project Architecture](#-project-architecture)
-- [Adding New Subjects](#-adding-new-subjects)
-- [Managing Notes](#-managing-notes)
-- [Local Development Configuration](#-local-development-configuration)
-- [Development Workflow](#-development-workflow)
-- [File Structure](#-file-structure)
-- [Troubleshooting](#-troubleshooting)
-
+- [Quick Setup](#quick-setup)
+- [Project Architecture](#project-architecture)
+- [Adding New Subjects](#adding-new-subjects)
+- [Managing Notes](#managing-notes)
+- [Local Development Configuration](#local-development-configuration)
+- [Development Workflow](#development-workflow)
+- [File Structure](#file-structure)
+- [Troubleshooting](#troubleshooting)
 ## 🚀 Quick Setup
 
 ### Prerequisites
