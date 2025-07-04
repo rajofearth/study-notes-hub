@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { SubjectPageJsx } from "./subject-page";
 import SubjectFilter from '@/components/homePage/SubjectFilter';
 import SubjectsGrid from '@/components/homePage/SubjectsGrid';
@@ -85,6 +85,24 @@ export function StudyNotesHubJsx() {
       file: "coi", 
       image: "https://images.pexels.com/photos/19883686/pexels-photo-19883686/free-photo-of-rashtrapati-bhavan-presidential-palace-in-new-delhi-india.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
       semesters: [2],
+    },
+    { 
+      title: "ERP (Enterprise Resource Planning)", 
+      file: "erp", 
+      image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      semesters: [3],
+    },
+    { 
+      title: "Statistics", 
+      file: "stats", 
+      image: "https://images.pexels.com/photos/669610/pexels-photo-669610.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      semesters: [3],
+    },
+    { 
+      title: "Web Development (HTML & CSS)", 
+      file: "webdev", 
+      image: "https://images.pexels.com/photos/270404/pexels-photo-270404.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      semesters: [3],
     }
   ];
 
@@ -144,7 +162,7 @@ export function StudyNotesHubJsx() {
         localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent));
       }
     }
-  }, [subjectId, studyTopics, recentlyViewed, selectedSubject]);
+  }, [subjectId, recentlyViewed, selectedSubject]);
 
   const handleSubjectClick = (subject) => {
     const updatedRecent = [subject, ...recentlyViewed.filter(item => item.file !== subject.file)].slice(0, 4);

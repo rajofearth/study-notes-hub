@@ -31,6 +31,12 @@ const SubjectFilter = ({ searchTerm, onSearchChange, semesterFilter, onSemesterF
       >
         Semester 2
       </Button>
+      <Button 
+        variant={semesterFilter === 3 ? 'default' : 'outline'}
+        onClick={() => onSemesterFilterChange(3)}
+      >
+        Semester 3
+      </Button>
     </div>
   </div>
 );

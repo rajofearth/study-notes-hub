@@ -15,7 +15,7 @@ export function SubjectPageJsx({ subject, onBack }) {
   const [selectedSemester, setSelectedSemester] = useState(() => {
     return semesterId
       ? `semester${semesterId}`
-      : (subject.semesters.includes(1) ? "semester1" : "semester2");
+      : `semester${subject.semesters[0]}`;
   });
   const [selectedNoteType, setSelectedNoteType] = useState(noteType || "notes");
   const [isMobile, setIsMobile] = useState(false);
@@ -30,28 +30,27 @@ export function SubjectPageJsx({ subject, onBack }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Define PDF sources
-  const pdfSources = {
-    semester1: {
-      notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s1.pdf`,
-      handwritten: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s1.pdf`,
-    },
-    semester2: {
-      notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s2.pdf`,
-      handwritten: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s2.pdf`,
-    },
+  // Define PDF sources dynamically for all semesters
+  const generatePdfSources = () => {
+    const sources = {};
+    const rawSources = {};
+    
+    subject.semesters.forEach(semester => {
+      sources[`semester${semester}`] = {
+        notes: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s${semester}.pdf`,
+        handwritten: `https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s${semester}.pdf`,
+      };
+      
+      rawSources[`semester${semester}`] = {
+        notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s${semester}.pdf`,
+        handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s${semester}.pdf`,
+      };
+    });
+    
+    return { sources, rawSources };
   };
 
-  const rawPdfSources = {
-    semester1: {
-      notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s1.pdf`,
-      handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s1.pdf`,
-    },
-    semester2: {
-      notes: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/${subject.file.toLowerCase()}-s2.pdf`,
-      handwritten: `https://raw.githubusercontent.com/rajofearth/study-notes-hub/main/public/pdfs/hwn/${subject.file.toLowerCase()}-s2.pdf`,
-    },
-  };
+  const { sources: pdfSources, rawSources: rawPdfSources } = generatePdfSources();
 
   // Handle semester change from SemesterTabs
   const handleSemesterChange = (value) => {
@@ -126,11 +125,16 @@ export function SubjectPageJsx({ subject, onBack }) {
     return subject.title;
   };
 
+  // Get current semester number for display
+  const getCurrentSemesterNumber = () => {
+    return selectedSemester.replace("semester", "");
+  };
+
   // Breadcrumb items for NavigationBar
   const breadcrumbItems = [
     { label: "Home", onClick: onBack },
     { label: getSubjectTitle() },
-    { label: selectedSemester === "semester1" ? "Semester 1" : "Semester 2" },
+    { label: `Semester ${getCurrentSemesterNumber()}` },
     { label: selectedNoteType === "notes" ? "Notes" : "Handwritten Notes" },
   ];
 

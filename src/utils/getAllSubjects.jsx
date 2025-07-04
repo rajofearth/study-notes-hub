@@ -1,4 +1,4 @@
-export default function getAllSubjects() {
+export default function getAllSubjects(studyTopics, recentlyViewed, semesterFilter, searchTerm) {
     // Combine recently viewed and other subjects, removing duplicates
     const recentIds = new Set(recentlyViewed.map(subject => subject.file));
     const otherSubjects = studyTopics.filter(subject => !recentIds.has(subject.file));

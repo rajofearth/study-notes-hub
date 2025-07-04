@@ -27,22 +27,24 @@ const SemesterTabs = ({
   );
 
   if (showSemesterTabs) {
+    const gridCols = subject.semesters.length === 2 ? 'grid-cols-2' : 
+                     subject.semesters.length === 3 ? 'grid-cols-3' : 
+                     'grid-cols-4';
+    
     return (
       <Tabs value={selectedSemester} onValueChange={onSemesterChange}>
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          {subject.semesters.includes(1) && (
-            <TabsTrigger value="semester1">Semester 1</TabsTrigger>
-          )}
-          {subject.semesters.includes(2) && (
-            <TabsTrigger value="semester2">Semester 2</TabsTrigger>
-          )}
+        <TabsList className={`grid w-full ${gridCols} mb-6`}>
+          {subject.semesters.map((semester) => (
+            <TabsTrigger key={semester} value={`semester${semester}`}>
+              Semester {semester}
+            </TabsTrigger>
+          ))}
         </TabsList>
-        <TabsContent value="semester1">
-          {renderNoteTypeTabs("Semester 1")}
-        </TabsContent>
-        <TabsContent value="semester2">
-          {renderNoteTypeTabs("Semester 2")}
-        </TabsContent>
+        {subject.semesters.map((semester) => (
+          <TabsContent key={semester} value={`semester${semester}`}>
+            {renderNoteTypeTabs(`Semester ${semester}`)}
+          </TabsContent>
+        ))}
       </Tabs>
     );
   }
