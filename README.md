@@ -70,6 +70,10 @@ npm run build
 
 The optimized files will be located in the `dist` directory.
 
+### 📝 Note for Contributors
+
+The application fetches PDF files from GitHub's raw content URLs in production. For local development with new subjects/notes, you may need to adjust the PDF source URLs in `src/components/subject-page.jsx` to point to local files. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for detailed instructions.
+
 ## 📝 Usage Guide
 
 - **Home Page**: Browse through available subjects and use the search bar for specific topics.
@@ -82,7 +86,22 @@ The optimized files will be located in the `dist` directory.
 
 ## 🤝 Contributing
 
-We welcome contributions! Feel free to submit a Pull Request or create an Issue for any suggestions or improvements.
+We welcome contributions! Whether you want to add new subjects, improve existing features, or fix bugs, your help is appreciated.
+
+**For detailed contribution guidelines**, please read our [CONTRIBUTORS.md](./CONTRIBUTORS.md) file which includes:
+- 🚀 Complete setup instructions
+- 🏗️ Project architecture explanation
+- 📚 How to add new subjects and notes
+- ⚙️ Local development configuration
+- 🐛 Troubleshooting guide
+
+**Quick Start for Contributors**:
+1. Fork the repository
+2. Read [CONTRIBUTORS.md](./CONTRIBUTORS.md) for detailed setup
+3. Make your changes
+4. Submit a Pull Request
+
+Feel free to create an Issue for any questions, suggestions, or bug reports.
 
 ## 📧 Contact
 
