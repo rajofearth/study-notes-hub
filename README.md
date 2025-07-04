@@ -68,12 +68,6 @@ To create a production build:
 npm run build
 ```
 
-The optimized files will be located in the `dist` directory.
-
-### 📝 Note for Contributors
-
-The application fetches PDF files from GitHub's raw content URLs in production. For local development with new subjects/notes, you may need to adjust the PDF source URLs in `src/components/subject-page.jsx` to point to local files. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for detailed instructions.
-
 ## 📝 Usage Guide
 
 - **Home Page**: Browse through available subjects and use the search bar for specific topics.
@@ -114,13 +108,5 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 ---
 
 Thank you for exploring Study Notes Hub! Enhance your learning journey with easy access to valuable resources. 🎓📖
-
----
-
-### Additional Configuration Files
-
-- **Package Configuration** (`package.json`): Defines dependencies, scripts, and settings for the project.
-- **Vite Configuration** (`vite.config.js`): Configures Vite with plugins, build options, and custom middleware.
-- **Main Application Component** (`src/App.jsx`): Sets up routing, theme provider, and the main component structure.
 
 ---

@@ -17,7 +17,7 @@ Welcome to the Study Notes Hub project! This guide will help you set up the proj
 
 ### Prerequisites
 
-- **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
+- **Node.js** - [Download here](https://nodejs.org/)
 - **npm** (comes with Node.js)
 - **Git** - [Download here](https://git-scm.com/)
 
