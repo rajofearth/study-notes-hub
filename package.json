@@ -2,6 +2,8 @@
   "name": "study-notes",
   "private": true,
   "version": "0.0.1",
+  "author": "rajofearth",
+  "license": "MIT",
   "type": "module",
   "homepage": "https://study-notes-hub.vercel.app/",
   "scripts": {

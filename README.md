@@ -76,7 +76,11 @@ npm run build
 
 ## 📸 Screenshots
 
-> _(Add screenshots of your application to showcase key features)_
+![Home Page](https://raw.githubusercontent.com/rajofearth/study-notes-hub/refs/heads/main/public/showcase/homepage-snh.png)
+*Home page showcasing subjects and search functionality*
+
+![Subject Page]((https://raw.githubusercontent.com/rajofearth/study-notes-hub/refs/heads/main/public/showcase/subjectpage-snh.png)
+*Subject page with semester selection and PDF notes view/download options*
 
 ## 🤝 Contributing
 
