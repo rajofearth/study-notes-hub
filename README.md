@@ -39,11 +39,6 @@ graph TB
     L --> M[Track Progress]
     M --> N[Local Storage]
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style G fill:#e8f5e8
-    style L fill:#fff3e0
-    style M fill:#fce4ec
 ```
 
 ## 🏗️ Architecture Diagram
@@ -84,13 +79,7 @@ graph LR
         O[public/pdfs/] --> E
         P[public/pdfs/hwn/] --> E
     end
-    
-    style A fill:#61dafb
-    style B fill:#61dafb
-    style C fill:#61dafb
-    style E fill:#ff6b6b
-    style M fill:#000000
-    style N fill:#24292e
+
 ```
 
 ## 📑 Key Features
@@ -142,12 +131,6 @@ graph TB
         M[ESLint 9.9.0] --> N[PostCSS]
         N --> O[Autoprefixer]
     end
-    
-    style A fill:#61dafb
-    style D fill:#38bdf8
-    style H fill:#f97316
-    style J fill:#a855f7
-    style L fill:#000000
 ```
 
 ## 📁 Project Structure
